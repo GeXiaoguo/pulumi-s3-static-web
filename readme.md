@@ -7,13 +7,13 @@
 
 # pulumi project setup
 ## using local file system as state storage
-    mkdir s3-static-web
     mkdir local-state
-    cd s3-static-web
     pulumi login file://./state
     // pulumi logout
 
 ## create a csharp pulumi project
+    mkdir pulumi
+    cd pulumi
     pulumi new aws-cscharp
 
 ## list the pulumi configuration
@@ -91,3 +91,5 @@
 
 # inspect s3 buckets
     aws s3 ls
+
+# Next see [readme-lambda.md](./readme-lambda.md) for a C# lambda walkthrough
