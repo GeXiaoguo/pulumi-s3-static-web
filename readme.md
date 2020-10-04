@@ -1,25 +1,25 @@
-
 # Pulumi C# Walkthrough - S3 Static Web
-# pulumi setup
+
+# Pulumi install
     runas /user:administrator "choco install pulumi"
     runas /user:administrator "choco upgrade pulumi"
     pulumi version
 
-# pulumi project setup
-## using local file system as state storage
+# Pulumi project setup
+## Use the local file system as state storage
     mkdir local-state
     pulumi login file://./state
     // pulumi logout
 
-## create a csharp pulumi project
+## Create a csharp pulumi project
     mkdir pulumi
     cd pulumi
     pulumi new aws-cscharp
 
-## list the pulumi configuration
+## List the pulumi configuration
     pulumi config
 
-## create a s3 bucket and dump a s3 object to it
+## Create a s3 bucket and dump a s3 object to it
     public MyStack()
     {
         // Create an AWS resource (S3 Bucket)
@@ -41,17 +41,17 @@
     [Output]
     public Output<string> BucketName { get; set; }
 
-# deploy the stack
+# Deploy the stack
     pulumi up
 
-# show stack output
+# Show stack output
     pulumi stack output BucketName
 
-# inspect s3 content
+# Inspect s3 content
     aws s3 ls $(pulumi stack output BucketName)
 
-# make the s3 bucket public
-## change the bucket definition
+# Make the s3 bucket public
+## Change the bucket definition
 
         var bucket = new Bucket("s3-static-web-html-bucket", new BucketArgs
         {
@@ -67,7 +67,7 @@
     [Output]
     public Output<string> WebSiteEndPoint { get; set; }
 
-## allow any body to read any object in the bucket
+## Allow any body to read any object in the bucket
         Func<string, string> publicS3ReadPolicyFunc = bucketId=> $@"{{
             ""Version"": ""2012-10-17"",
             ""Statement"": [{{
@@ -86,10 +86,10 @@
             Policy = bucket.Id.Apply(publicS3ReadPolicyFunc),
         });
 
-# destroy the stack
+# Destroy the stack
     pulumi destroy
 
-# inspect s3 buckets
+# Inspect s3 buckets
     aws s3 ls
 
-# Next see [readme-lambda.md](./readme-lambda.md) for a C# lambda walkthrough
+# Next see the [C# Lambda Walkthrough](./readme-lambda.md) for a C# lambda walkthrough
