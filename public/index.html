@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>A JS Mini App</title>
+  <script src="./runtime-config.js"></script>
+  <script>
+    function hitTheAPI() {
+        var value = document.getElementById("my_input").value;
+        const url = window["runtime-config"].apiUrl;
+        alert(url)
+    }
+    </script>
+</head>
+<body>
+  <h1>JS Mini App</h1>
+  <input id="my_input" value="hello" />
+  <button onclick="hitTheAPI()">Click Me</button>
+</html> 

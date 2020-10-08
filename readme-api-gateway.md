@@ -88,3 +88,4 @@
 https://seed.run/blog/how-to-enable-execution-logs-for-api-gateway.html
    
 
+# Next see the [Pulumi C# Consuming Output in Frontend App](./readme-consuming-pulumi-output.md)
