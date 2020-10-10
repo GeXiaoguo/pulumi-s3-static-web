@@ -34,9 +34,43 @@ It is common that some of the Pulumi Output will need to be passed to the applic
     </html> 
 
 ### Deploy the folder to the s3 bucket
-  // todo
-## Passing the Pulumi Output into the frontend app
-  // todo
-### Overwriting rumtime-config.js during deployment
-  // todo
+    var objects = bucket.BucketName.Apply(bucketName=>LoadFilesToS3(@"./public", bucketName));
 
+    private static IEnumerable<BucketObject> LoadFilesToS3(string folderPath, string bucketName)
+    {
+        return Directory.EnumerateFiles(folderPath)
+            .Select(file=>CreateBucketObject(file, bucketName))
+            .ToList();
+    }
+    private static BucketObject CreateBucketObject (string filePath, string bucketName)
+    {
+        var fileName = Path.GetFileName(filePath);
+        var fileExtension = Path.GetExtension(fileName);
+        var s3Object = new BucketObject(fileName, new BucketObjectArgs
+        {
+            Bucket = bucketName,
+            Source = new FileAsset(filePath),
+            Key = fileName,
+            ContentType = MimeMapping(fileExtension),
+
+        });
+        return s3Object;
+    }
+    private static string MimeMapping(string fileExtension) => fileExtension switch
+    {
+        ".htm" => "text/html",
+        ".html" => "text/html",
+        ".js" => "application/javascript",
+        _ => throw new NotImplementedException($"Mime type for {fileExtension} is not defined"),
+    };
+    
+## Overwrite runtime-config.js in the bucket
+    var url = CreateRestAPIGatewayResources(apiGatewayLambda);
+    var runtimeConfigJS = url.Apply(x=> new BucketObject("runtime-config.js", new BucketObjectArgs
+    {
+        Bucket = bucket.BucketName,
+        Content = $@"window['runtime-config'] = {{apiUrl: '${x}'}}",
+    }));
+
+    //todo Duplicate resource URN, https://github.com/pulumi/pulumi/issues/5542
+        

@@ -5,16 +5,25 @@ using Pulumi.Aws.Lambda;
 using Pulumi.Aws.S3;
 using Pulumi.Aws.S3.Inputs;
 using Pulumi.Aws.ApiGateway;
-using System.Text.Json;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 class MyStack : Stack
 {
     public MyStack()
     {
+        Bucket bucket = CreateS3BucketResources();
         Function lambda = CreateLambdaResources();
         Function apiGatewayLambda = CreateAPIGatewayLambdaResources();
-        Bucket bucket = CreateS3BucketResources();
         var url = CreateRestAPIGatewayResources(apiGatewayLambda);
+
+        var objects = bucket.BucketName.Apply(bucketName => LoadFilesToS3(@"./public", bucketName));
+        var runtimeConfigJS = url.Apply(x => new BucketObject("runtime-config.js", new BucketObjectArgs
+        {
+            Bucket = bucket.BucketName,
+            Content = $@"window['runtime-config'] = {{apiUrl: '${x}'}}",
+        }));
 
         this.BucketName = bucket.Id;
         this.WebSiteEndPoint = bucket.WebsiteEndpoint;
@@ -66,10 +75,10 @@ class MyStack : Stack
             Action = "lambda:invokeFunction",
             Function = lambda.Name,
             Principal = "apigateway.amazonaws.com",
-            SourceArn = deployment.ExecutionArn.Apply(x=>$"{x}*/*")
+            SourceArn = deployment.ExecutionArn.Apply(x => $"{x}*/*")
         });
 
-        return deployment.InvokeUrl.Apply(x=>$"{x}test-stage");
+        return deployment.InvokeUrl.Apply(x => $"{x}test-stage");
     }
     private static Bucket CreateS3BucketResources()
     {
@@ -100,17 +109,35 @@ class MyStack : Stack
             Policy = bucket.Id.Apply(publicS3ReadPolicyFunc),
         });
 
-        var s3Object = new BucketObject("index.html", new BucketObjectArgs
-        {
-            Bucket = bucket.BucketName,
-            Content = @"<html>
-                            <body>
-                                <h1>Hello, Pulumi!</h1>
-                            </body>
-                        </html>",
-        });
         return bucket;
     }
+    private static IEnumerable<BucketObject> LoadFilesToS3(string folderPath, string bucketName)
+    {
+        return Directory.EnumerateFiles(folderPath)
+            .Select(file => CreateBucketObject(file, bucketName))
+            .ToList();
+    }
+    private static BucketObject CreateBucketObject(string filePath, string bucketName)
+    {
+        var fileName = Path.GetFileName(filePath);
+        var fileExtension = Path.GetExtension(fileName);
+        var s3Object = new BucketObject(fileName, new BucketObjectArgs
+        {
+            Bucket = bucketName,
+            Source = new FileAsset(filePath),
+            Key = fileName,
+            ContentType = MimeMapping(fileExtension),
+
+        });
+        return s3Object;
+    }
+    private static string MimeMapping(string fileExtension) => fileExtension switch
+    {
+        ".htm" => "text/html",
+        ".html" => "text/html",
+        ".js" => "application/javascript",
+        _ => throw new NotImplementedException($"Mime type for {fileExtension} is not defined"),
+    };
     private static Function CreateLambdaResources()
     {
         var lambdaRole = new Role("lambdaRole", new RoleArgs
@@ -203,7 +230,7 @@ class MyStack : Stack
             Handler = "csharp-lambda-lib::csharp_lambda_lib.Function::APIGatewayHandler",
             Role = lambdaRole.Arn,
         });
-        
+
         return lambda;
     }
 
@@ -218,7 +245,7 @@ class MyStack : Stack
 
     [Output]
     public Output<string> BucketName { get; set; }
-    
+
     [Output]
     public Output<string> WebSiteEndPoint { get; set; }
 }
