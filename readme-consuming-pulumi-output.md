@@ -65,12 +65,44 @@ It is common that some of the Pulumi Output will need to be passed to the applic
     };
     
 ## Overwrite runtime-config.js in the bucket
-    var url = CreateRestAPIGatewayResources(apiGatewayLambda);
-    var runtimeConfigJS = url.Apply(x=> new BucketObject("runtime-config.js", new BucketObjectArgs
-    {
-        Bucket = bucket.BucketName,
-        Content = $@"window['runtime-config'] = {{apiUrl: '${x}'}}",
-    }));
+Overwrite exiting file during the same session is not possible yet://https://github.com/pulumi/pulumi/issues/5542. As a workaround, we will have to overwrite the file while copying them to S3  
 
-    //todo Duplicate resource URN, https://github.com/pulumi/pulumi/issues/5542
+    Func<string, Output<string>?> overwriteFiles = fileName => fileName == "runtime-config.js"? url.Apply(x=>$@"window['runtime-config'] = {{apiUrl: '${x}'}}") : null;  
+    var objects = bucket.BucketName.Apply(bucketName => LoadFilesToS3(@"./public", bucketName, overwriteFiles));
+
+    private static BucketObject CreateBucketObject(string filePath, string bucketName, Func<string, Output<string>?> overwriteFiles)
+    {
+        var fileName = Path.GetFileName(filePath);
+        var fileExtension = Path.GetExtension(fileName);
+        var overWriteWith = overwriteFiles(fileName);
+
+        var s3Object = overWriteWith switch
+        {
+            null => new BucketObject(fileName, new BucketObjectArgs
+            {
+                Bucket = bucketName,
+                Source = new FileAsset(filePath),
+                Key = fileName,
+                ContentType = MimeMapping(fileExtension),
+
+            }),
+            _ => new BucketObject(fileName, new BucketObjectArgs
+            {
+                Bucket = bucketName,
+                Content = overWriteWith,
+                Key = fileName,
+                ContentType = MimeMapping(fileExtension),
+
+            })
+        };
+
+        return s3Object;
+    }
+
+# Deploy and test
+    pulumi up
+    load the WebSiteEndPoint the deploytime url should be loaded by the JavaScript app
+    //todo: Investigate API Gateway CORS setup with pulumi, circular dependency here
+# Destroy 
+    pulumi destroy
         

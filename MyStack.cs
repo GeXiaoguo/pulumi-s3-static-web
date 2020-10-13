@@ -18,12 +18,8 @@ class MyStack : Stack
         Function apiGatewayLambda = CreateAPIGatewayLambdaResources();
         var url = CreateRestAPIGatewayResources(apiGatewayLambda);
 
-        var objects = bucket.BucketName.Apply(bucketName => LoadFilesToS3(@"./public", bucketName));
-        var runtimeConfigJS = url.Apply(x => new BucketObject("runtime-config.js", new BucketObjectArgs
-        {
-            Bucket = bucket.BucketName,
-            Content = $@"window['runtime-config'] = {{apiUrl: '${x}'}}",
-        }));
+        Func<string, Output<string>?> overwriteFiles = fileName => fileName == "runtime-config.js"? url.Apply(x=>$@"window['runtime-config'] = {{apiUrl: '${x}'}}") : null;
+        var objects = bucket.BucketName.Apply(bucketName => LoadFilesToS3(@"./public", bucketName, overwriteFiles));
 
         this.BucketName = bucket.Id;
         this.WebSiteEndPoint = bucket.WebsiteEndpoint;
@@ -40,6 +36,11 @@ class MyStack : Stack
                     ""info"" : {{""title"" : ""api"", ""version"" : ""1.0""}},
                     ""paths"" : {{
                         ""/{{proxy+}}"" : {{
+                            ""x-amazon-apigateway-cors"":{{
+                                ""allowOrigins"": ""*"",
+                                ""allowMethodsd"": ""*"",
+                                ""allowHeaders"": ""*""
+                            }},                 
                             ""x-amazon-apigateway-any-method"" : {{
                                 ""x-amazon-apigateway-integration"" : {{
                                     ""uri"" : ""arn:aws:apigateway:ap-southeast-2:lambda:path/2015-03-31/functions/{lambdaArn}/invocations"",
@@ -111,24 +112,38 @@ class MyStack : Stack
 
         return bucket;
     }
-    private static IEnumerable<BucketObject> LoadFilesToS3(string folderPath, string bucketName)
+    private static IEnumerable<BucketObject> LoadFilesToS3(string folderPath, string bucketName, Func<string, Output<string>?> overwriteFiles)
     {
         return Directory.EnumerateFiles(folderPath)
-            .Select(file => CreateBucketObject(file, bucketName))
+            .Select(file => CreateBucketObject(file, bucketName, overwriteFiles))
             .ToList();
     }
-    private static BucketObject CreateBucketObject(string filePath, string bucketName)
+    private static BucketObject CreateBucketObject(string filePath, string bucketName, Func<string, Output<string>?> overwriteFiles)
     {
         var fileName = Path.GetFileName(filePath);
         var fileExtension = Path.GetExtension(fileName);
-        var s3Object = new BucketObject(fileName, new BucketObjectArgs
-        {
-            Bucket = bucketName,
-            Source = new FileAsset(filePath),
-            Key = fileName,
-            ContentType = MimeMapping(fileExtension),
+        var overWriteWith = overwriteFiles(fileName);
 
-        });
+        var s3Object = overWriteWith switch
+        {
+            null => new BucketObject(fileName, new BucketObjectArgs
+            {
+                Bucket = bucketName,
+                Source = new FileAsset(filePath),
+                Key = fileName,
+                ContentType = MimeMapping(fileExtension),
+
+            }),
+            _ => new BucketObject(fileName, new BucketObjectArgs
+            {
+                Bucket = bucketName,
+                Content = overWriteWith,
+                Key = fileName,
+                ContentType = MimeMapping(fileExtension),
+
+            })
+        };
+
         return s3Object;
     }
     private static string MimeMapping(string fileExtension) => fileExtension switch

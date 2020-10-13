@@ -27,12 +27,19 @@
     });
         
 ## Create pulumi resources for a restAPI for the new lambda
+OpenAPI is supported by AWS API Gateway: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions.html
+
         var body = lambda.Arn.Apply(lambdaArn => $@"
                 {{
                     ""swagger"" : ""2.0"",
                     ""info"" : {{""title"" : ""api"", ""version"" : ""1.0""}},
                     ""paths"" : {{
                         ""/{{proxy+}}"" : {{
+                            ""x-amazon-apigateway-cors"":{{
+                                ""allowOrigins"": ""*"",
+                                ""allowMethodsd"": ""*"",
+                                ""allowHeaders"": ""*""
+                            }}
                             ""x-amazon-apigateway-any-method"" : {{
                                 ""x-amazon-apigateway-integration"" : {{
                                     ""uri"" : ""arn:aws:apigateway:ap-southeast-2:lambda:path/2015-03-31/functions/{lambdaArn}/invocations"",

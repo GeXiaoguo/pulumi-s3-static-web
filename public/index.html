@@ -9,6 +9,15 @@
         var value = document.getElementById("my_input").value;
         const url = window["runtime-config"].apiUrl;
         alert(url)
+        fetch(url+'/{proxy+}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(value),
+        }).then(data=>{
+          alert(data)
+        });
     }
     </script>
 </head>
