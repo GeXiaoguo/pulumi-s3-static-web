@@ -8,7 +8,6 @@
     function hitTheAPI() {
         var value = document.getElementById("my_input").value;
         const url = window["runtime-config"].apiUrl;
-        alert(url)
         fetch(url+'/{proxy+}', {
           method: 'POST',
           mode: 'cors',
