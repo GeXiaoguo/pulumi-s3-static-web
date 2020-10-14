@@ -110,7 +110,7 @@ Adding the following headers to the responses that the lambda returns enables CO
 
 Please note, the allowed origin is set to `*`. Ideally it should be set to our S3 web front end domain. But this will create a syclic dependency in Pulumi. This issues is being discussed [here](https://github.com/pulumi/pulumi/issues/3021)
 The dependencies that are involved are illustraged below
-![Circular Dependency Illustration](https://drive.google.com/file/d/1pvqeBmuFC_pd5g53GBwB56l9hnsxTRtH/view?usp=sharing)
+![Circular Dependency Illustration](./images/CircularDependency.png)
 
 
 
