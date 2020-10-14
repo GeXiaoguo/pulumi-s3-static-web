@@ -100,8 +100,9 @@ Overwrite exiting file during the same session is not possible yet://https://git
     }
 
 ### Enable CORS
-Since our S3 index.html file and the API Gateway endpoint are from different domains, making API calls from index.html is subject to CORS. Basically, browser inspects all api requets it receives from the webpages and if the call is subject to CORS control. The exact process is documented [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html). If the api call does subject to CORS, the our API Gateway needs to support CORS and since our API Gateway is setup just being a proxy, the responsibility of supporting CORS is passed to our lambda. 
-Adding the following headers to the responses that the lambda returns enables CORS support
+Since our S3 index.html file and the API Gateway endpoint are from different domains, making API calls from index.html to our API endpoint is subject to CORS control. The browser will inspect all api requets it receives from the webpages and check if the call is subject to CORS control. The exact process is documented [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html). If the api call does subject to CORS control, then the our API Gateway needs to support CORS. And since our API Gateway is setup only being a proxy, the responsibility of supporting CORS is passed to our lambda. 
+
+Adding the following headers to the responses that the lambda returns enables CORS
 
     { "Access-Control-Allow-Origin", "*" },
     { "Access-Control-Allow-Headers", "Content-Type"},
