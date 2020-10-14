@@ -115,7 +115,6 @@ Please note, the allowed origin is set to `*`. Ideally it should be set to our S
 # Deploy and test
     pulumi up
     load the WebSiteEndPoint the deploytime url should be loaded by the JavaScript app
-    //todo: Investigate API Gateway CORS setup with pulumi, circular dependency here
 # Destroy 
     pulumi destroy
         
