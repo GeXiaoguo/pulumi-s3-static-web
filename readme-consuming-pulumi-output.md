@@ -64,7 +64,7 @@ It is common that some of the Pulumi Output will need to be passed to the applic
         _ => throw new NotImplementedException($"Mime type for {fileExtension} is not defined"),
     };
     
-## Overwrite runtime-config.js in the bucket
+### Overwrite runtime-config.js in the bucket
 Overwrite exiting file during the same session is not possible yet://https://github.com/pulumi/pulumi/issues/5542. As a workaround, we will have to overwrite the file while copying them to S3  
 
     Func<string, Output<string>?> overwriteFiles = fileName => fileName == "runtime-config.js"? url.Apply(x=>$@"window['runtime-config'] = {{apiUrl: '${x}'}}") : null;  
@@ -98,6 +98,18 @@ Overwrite exiting file during the same session is not possible yet://https://git
 
         return s3Object;
     }
+
+### Enable CORS
+Since our S3 index.html file and the API Gateway endpoint are from different domains, making API calls from index.html is subject to CORS. Basically, browser inspects all api requets it receives from the webpages and if the call is subject to CORS control. The exact process is documented [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html). If the api call does subject to CORS, the our API Gateway needs to support CORS and since our API Gateway is setup just being a proxy, the responsibility of supporting CORS is passed to our lambda. 
+Adding the following headers to the responses that the lambda returns enables CORS support
+
+    { "Access-Control-Allow-Origin", "*" },
+    { "Access-Control-Allow-Headers", "Content-Type"},
+    { "Access-Control-Allow-Methods", "OPTIONS,POST,GET"},
+
+Please note, the allowed origin is set to `*`. Ideally it should be set to our S3 web front end domain. But this will create a syclic dependency in Pulumi. This issues is being discussed [here](https://github.com/pulumi/pulumi/issues/3021)
+
+
 
 # Deploy and test
     pulumi up

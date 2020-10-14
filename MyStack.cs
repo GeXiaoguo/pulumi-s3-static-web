@@ -18,7 +18,7 @@ class MyStack : Stack
         Function apiGatewayLambda = CreateAPIGatewayLambdaResources();
         var url = CreateRestAPIGatewayResources(apiGatewayLambda);
 
-        Func<string, Output<string>?> overwriteFiles = fileName => fileName == "runtime-config.js"? url.Apply(x=>$@"window['runtime-config'] = {{apiUrl: '${x}'}}") : null;
+        Func<string, Output<string>?> overwriteFiles = fileName => fileName == "runtime-config.js"? url.Apply(x=>$@"window['runtime-config'] = {{apiUrl: '{x}'}}") : null;
         var objects = bucket.BucketName.Apply(bucketName => LoadFilesToS3(@"./public", bucketName, overwriteFiles));
 
         this.BucketName = bucket.Id;
