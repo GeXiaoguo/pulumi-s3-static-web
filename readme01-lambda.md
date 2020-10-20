@@ -1,8 +1,8 @@
 # Pulumi C# Walkthrough - Lambda
 
-# This walkthrough builds on the [Pulumi C# Walkthrough](./readme.md)
+### This walkthrough builds on the [Pulumi C# Walkthrough - S3 Static Web](./readme.md)
 
-## Create a classlib project for the lambda function
+### Create a classlib project for the lambda function
 in a new folder 
     mkdir csharp-lambda-lib
     cd csharp-lambda-lib
@@ -27,7 +27,7 @@ in a new folder
 ### Inspect the published artifacts in 
     csharp-lambda-lib/bin/debug/dotnetcore3.1/publish/
 
-## Define pulumi stack for the lambda
+### Define pulumi stack for the lambda
         var lambdaRole = new Role("lambdaRole", new RoleArgs
         {
             AssumeRolePolicy =
@@ -72,15 +72,15 @@ in a new folder
             Role = lambdaRole.Arn,
         });
 
-## Deploy the stack
+### Deploy the stack
     pulumi up
 
-## Inspect the deployment result
+### Inspect the deployment result
     pulumi stack output
 
-## Test the lambda 
+### Test the lambda 
     aws lambda invoke --function-name $(pulumi stack output Lambda) --cli-binary-format raw-in-base64-out --payload '"xiaoguo"' output.json
     // --payload value has to be a json string, "xiaoguo" is a valid json string literal, single quote it as the paramter to --payload
     // --cli-binary-format raw-in-base64-out is important becuase aws cli by default take base64 encoded binary data as input
 
-# Next see the [Pulumi C# API Gateway + Lambda Walkthrough](./readme-api-gateway.md)
+### Next see the [Pulumi C# Walkthrough - API Gateway](./readme02-api-gateway.md)

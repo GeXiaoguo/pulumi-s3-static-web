@@ -1,10 +1,9 @@
-# Pulumi C# Consuming Output in Frontend App
+# Pulumi C# Walkthrough - Consuming Output in Frontend App
 
-### This walkthrough builds on the [Pulumi C# API Gateway + Lambda Walkthrough - API Gateway](./readme-api-gateway.md)
+### This walkthrough builds on the [Pulumi C# Walkthrough - API Gateway](./readme02-api-gateway.md)
 
 It is common that some of the Pulumi Output will need to be passed to the application for consumption. A typical example is the URL for the API Gateway endpoint. It is not know until after the deployment and the URL needs to be loaded by the frontend application for API invocation. We will use a minimum JavaScript app as a demo of how this is typically done.
 
-## Preparing the mini frontend app
 ### Create a `publish` folder for loading into the s3 bucket
 ### Create a index.html and runtime-config.js file in the `publish` folder
     //runtime-config.js
@@ -114,9 +113,10 @@ The dependencies that are involved are illustraged below
 
 
 
-# Deploy and test
+### Deploy and test
     pulumi up
     load the WebSiteEndPoint the deploytime url should be loaded by the JavaScript app
-# Destroy 
+### Destroy 
     pulumi destroy
         
+### Next [Pulumi C# Walkthrough - Route 53](./readme04-route53.md)

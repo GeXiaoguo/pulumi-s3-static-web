@@ -1,8 +1,6 @@
-# Pulumi C# API Gateway + Lambda Walkthrough - API Gateway
+# Pulumi C# Walkthrough - API Gateway
 
-# This walkthrough builds on the [C# Lambda Walkthrough](./readme-lambda.md)
-
-## Create a a new lambda to be triggered by APIGateway
+### This walkthrough builds on the [Pulumi C# Walkthrough - Lambda](./readme01-lambda.md)
 
 ### Add the nuget package to csharp-lambda-lib project
     dotnet add package Amazon.Lambda.APIGatewayEvents
@@ -14,10 +12,10 @@
             StatusCode = 200,
         };
 
-## Publish the C# library
+### Publish the C# library
     dotnet publish //p:GenerateRuntimeConfigurationFiles=true csharp-lambda-lib.csproj
 
-## Create the new lambda resources
+### Create the new lambda resources
     var lambda = new Function("apiGatewayLambda", new FunctionArgs
     {
         Runtime = "dotnetcore3.1",
@@ -26,7 +24,7 @@
         Role = lambdaRole.Arn,
     });
         
-## Create pulumi resources for a restAPI for the new lambda
+### Create pulumi resources for a restAPI for the new lambda
 OpenAPI is supported by AWS API Gateway: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions.html
 
         var body = lambda.Arn.Apply(lambdaArn => $@"
@@ -80,19 +78,19 @@ OpenAPI is supported by AWS API Gateway: https://docs.aws.amazon.com/apigateway/
 
         return deployment.InvokeUrl.Apply(x=>$"{x}test-stage");
 
-## Deploy the stack
+### Deploy the stack
     pulumi up
 
-## Inspect the deployment result
+### Inspect the deployment result
     pulumi stack output
     // sample api path: http://2gcx23nt87.execute-api.ap-southeast-2.amazonaws.com/test-stage/{proxy+}
 
-## Test the api
+### Test the api
     curl --header "Content-Type: application/json" --request POST --data '{"a":"b",}' $( pulumi stack output APIEndpoint)/{proxy+}
     //expected otuput: Hello {"a":"b",}
 
-## Turn on CloudWatch log for trouble shooting API Gateway
+### Turn on CloudWatch log for trouble shooting API Gateway
 https://seed.run/blog/how-to-enable-execution-logs-for-api-gateway.html
    
 
-# Next see the [Pulumi C# Consuming Output in Frontend App](./readme-consuming-pulumi-output.md)
+### Next [Pulumi C# Walkthrough - API Gateway](./readme03-consuming-pulumi-output.md)
