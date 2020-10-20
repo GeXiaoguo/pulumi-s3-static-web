@@ -83,4 +83,4 @@ in a new folder
     // --payload value has to be a json string, "xiaoguo" is a valid json string literal, single quote it as the paramter to --payload
     // --cli-binary-format raw-in-base64-out is important becuase aws cli by default take base64 encoded binary data as input
 
-### Next see the [Pulumi C# Walkthrough - API Gateway](./readme02-api-gateway.md)
+### Next [Pulumi C# Walkthrough - API Gateway](./readme02-api-gateway.md)

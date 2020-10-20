@@ -90,4 +90,4 @@
 ### Inspect s3 buckets
     aws s3 ls
 
-### Next see the [Pulumi C# Walkthrough - Lambda](./readme01-lambda.md) for a C# lambda walkthrough
+### Next [Pulumi C# Walkthrough - Lambda](./readme01-lambda.md)

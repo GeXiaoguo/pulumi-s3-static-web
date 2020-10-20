@@ -93,4 +93,4 @@ OpenAPI is supported by AWS API Gateway: https://docs.aws.amazon.com/apigateway/
 https://seed.run/blog/how-to-enable-execution-logs-for-api-gateway.html
    
 
-### Next [Pulumi C# Walkthrough - API Gateway](./readme03-consuming-pulumi-output.md)
+### Next [Pulumi C# Walkthrough - Consuming Output in Frontend App](./readme03-consuming-pulumi-output.md)
