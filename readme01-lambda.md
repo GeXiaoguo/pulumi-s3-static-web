@@ -3,7 +3,7 @@
 ### This walkthrough builds on the [Pulumi C# Walkthrough - S3 Static Web](./readme.md)
 
 ### Create a classlib project for the lambda function
-in a new folder 
+    //in a new folder  
     mkdir csharp-lambda-lib
     cd csharp-lambda-lib
     dotnet new classlib
@@ -21,8 +21,9 @@ in a new folder
 ### Add nuget packages and publish the project
     dotnet add package Amazon.Lambda.Core
     dotnet add package Amazon.Lambda.Serialization.Json
-    dotnet publish //p:GenerateRuntimeConfigurationFiles=true csharp-lambda-lib.csproj
-    //GenerateRuntimeConfigurationFiles is important because by default, for a classlib project, dotnet publish will not create a runtimeconfig.json file, which AWS lambda demends
+    dotnet restore
+    dotnet publish /p:GenerateRuntimeConfigurationFiles=true csharp-lambda-lib.csproj
+    //GenerateRuntimeConfigurationFiles is important because by default, for a classlib project, dotnet publish will not create a runtimeconfig.json file, which AWS lambda demends on
 
 ### Inspect the published artifacts in 
     csharp-lambda-lib/bin/debug/dotnetcore3.1/publish/
@@ -68,7 +69,7 @@ in a new folder
         {
             Runtime = "dotnetcore3.1",
             Code = new FileArchive("../csharp-lambda-lib/bin/debug/netstandard2.0/publish"),
-            Handler = "csharp_lambda_lib::Function:FunctionHandler",
+            Handler = "csharp_lambda_lib::Function:FunctionHandler", // format ASSEMBLY::TYPE::METHOD. Type is fully qualified with namespaces
             Role = lambdaRole.Arn,
         });
 

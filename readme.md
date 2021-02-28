@@ -1,19 +1,21 @@
 # Pulumi C# Walkthrough - S3 Static Web
 
-### Pulumi install
+### Pulumi install globally
     runas /user:administrator "choco install pulumi"
     runas /user:administrator "choco upgrade pulumi"
+
+### Set Pulumi path to the local command line
+    set path=%path%;c:\ProgramData\chocolatey\lib\pulumi\tools\Pulumi\bin
     pulumi version
 
 ### Use the local file system as state storage
-    mkdir local-state
-    pulumi login file://./state
+    pulumi login --local
     // pulumi logout
 
 ### Create a csharp pulumi project
     mkdir pulumi
     cd pulumi
-    pulumi new aws-cscharp
+    pulumi new aws-csharp
 
 ### List the pulumi configuration
     pulumi config
@@ -41,6 +43,7 @@
     public Output<string> BucketName { get; set; }
 
 ### Deploy the stack
+    // pulumi will use the credentials from your aws cli if you have it setup. Otherwise refer to this https://www.pulumi.com/docs/intro/cloud-providers/aws/setup/ on how to connect pulumi to your account
     pulumi up
 
 ### Show stack output
